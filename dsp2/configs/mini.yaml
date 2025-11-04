@@ -1,0 +1,29 @@
+# Environment
+n_floors: 5
+m_elevators: 2
+capacity: 4
+dt: 1.0
+lambda: 0.02
+t_max: 120
+seed: 0
+w_wait: 1.0
+w_incar: 0.2
+
+# Agent
+gamma: 0.99
+lr: 0.0001
+batch_size: 32
+replay_capacity: 5000
+target_update_steps: 500
+tau: 1.0
+epsilon_start: 1.0
+epsilon_end: 0.05
+decay_steps: 2000
+grad_clip: 5.0
+
+# Training
+training_steps: 200
+warmup_steps: 64
+log_interval: 50
+ckpt_interval: 1000000
+logdir: dsp2/logs/mini
