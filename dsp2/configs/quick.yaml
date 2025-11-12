@@ -1,0 +1,42 @@
+# Quick Training Configuration (10k steps instead of 100k)
+# Environment
+n_floors: 10
+m_elevators: 2
+capacity: 8
+dt: 1.0
+lambda: 0.01
+t_max: 3600
+seed: 42
+w_wait: 1.0
+w_incar: 0.3
+r_alight: 0.1
+r_board: 0.02
+penalty_normalize: true
+
+# Agent
+gamma: 0.99
+lr: 0.0003
+batch_size: 64
+replay_capacity: 50000
+target_update_steps: 2500
+tau: 1.0
+epsilon_start: 1.0
+epsilon_end: 0.01
+decay_steps: 8000
+grad_clip: 10.0
+# Improvements
+dueling: true
+use_per: false
+per_alpha: 0.6
+per_beta: 0.4
+per_beta_increment: 0.000001
+use_vdn: true
+use_central_bias: false
+
+# Training
+training_steps: 10000
+warmup_steps: 500
+log_interval: 500
+ckpt_interval: 5000
+logdir: dsp2/logs/quick
+
