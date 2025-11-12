@@ -8,18 +8,26 @@ t_max: 120
 seed: 0
 w_wait: 1.0
 w_incar: 0.2
+r_alight: 0.1
+r_board: 0.02
+penalty_normalize: true
 
 # Agent
 gamma: 0.99
-lr: 0.0001
+lr: 0.0002
 batch_size: 32
 replay_capacity: 5000
 target_update_steps: 500
 tau: 1.0
 epsilon_start: 1.0
 epsilon_end: 0.05
-decay_steps: 2000
+decay_steps: 500
 grad_clip: 5.0
+# Improvements
+dueling: true
+use_per: false
+use_vdn: true
+use_central_bias: false
 
 # Training
 training_steps: 200

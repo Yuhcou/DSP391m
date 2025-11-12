@@ -28,7 +28,7 @@ def test_replay_and_train_step():
         # reconstruct mask from state vector
         from dsp2.agents.masks import legal_action_mask_from_state
         return legal_action_mask_from_state(st, env.N, env.M)
-    loss, q_mean = agent.train_step(batch, mask_fn)
+    loss, q_mean, per_td = agent.train_step(batch, mask_fn)
     assert isinstance(loss, float)
     assert isinstance(q_mean, float)
-
+    assert per_td is None or isinstance(per_td, np.ndarray)
