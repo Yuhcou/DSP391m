@@ -1,0 +1,45 @@
+aggregate:
+  max_ajt: 41.510909090909095
+  max_awt: 24.02047619047619
+  mean_ajt: 10.726117216117217
+  mean_awt: 6.789620379620379
+  mean_return: 10.48533333333333
+  min_ajt: 3.000752580752581
+  min_awt: 1.957012987012987
+algorithms:
+  collective:
+    mean_ajt: 3.034085914085914
+    mean_awt: 2.945597735597736
+    mean_return: 13.01666666666666
+    std_ajt: 0.3421913946957779
+    std_awt: 0.5603477559869028
+    std_return: 4.273536136633346
+  fixed_priority:
+    mean_ajt: 3.000752580752581
+    mean_awt: 1.957012987012987
+    mean_return: 13.25666666666666
+    std_ajt: 0.3518689945429696
+    std_awt: 0.3253199833759693
+    std_return: 4.164874281149159
+  nearest_car:
+    mean_ajt: 3.084085914085914
+    mean_awt: 2.9422877122877122
+    mean_return: 12.946666666666662
+    std_ajt: 0.35169071525311874
+    std_awt: 0.39370185964796406
+    std_return: 4.12773007300084
+  random:
+    mean_ajt: 41.510909090909095
+    mean_awt: 24.02047619047619
+    mean_return: -0.02333333333332508
+    std_ajt: 11.855237570425981
+    std_awt: 9.186686067730271
+    std_return: 3.0643940854777587
+  sectoring:
+    mean_ajt: 3.000752580752581
+    mean_awt: 2.082727272727273
+    mean_return: 13.229999999999993
+    std_ajt: 0.3518689945429696
+    std_awt: 0.2002560344629919
+    std_return: 4.19155765265796
+config: simple

@@ -21,6 +21,7 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 def make_env(cfg):
+    print("use_adaptive_reward",cfg.get('use_adaptive_reward', False))
     return EGCSEnv(
         n_floors=cfg['n_floors'],
         m_elevators=cfg['m_elevators'],
@@ -33,7 +34,15 @@ def make_env(cfg):
         w_incar=cfg['w_incar'],
         r_alight=cfg['r_alight'],
         r_board=cfg['r_board'],
-        penalty_normalize=cfg['penalty_normalize']
+        penalty_normalize=cfg['penalty_normalize'],
+        # Adaptive reward parameters
+        use_adaptive_reward=cfg.get('use_adaptive_reward', False),
+        baseline_config=cfg.get('baseline_config', None),
+        baseline_weight=cfg.get('baseline_weight', 0.5),
+        performance_bonus_scale=cfg.get('performance_bonus_scale', 1.0),
+        comparative_penalty_scale=cfg.get('comparative_penalty_scale', 2.0),
+        curriculum_stage=cfg.get('curriculum_stage', 0),
+        use_dynamic_weights=cfg.get('use_dynamic_weights', False)
     )
 
 def train():
@@ -53,7 +62,7 @@ def train():
     print("=" * 80)
     print()
 
-    config_path = os.path.join('dsp2', 'configs', 'default.yaml')
+    config_path = os.path.join('dsp2', 'configs', 'adaptive.yaml')
     cfg = load_config(config_path)
 
     logdir = cfg['logdir']
@@ -116,14 +125,40 @@ def train():
             writer.add_scalar('q_mean', q_mean, t)
 
         if done:
+            # Calculate steps in this episode
+            ep_steps = t - (0 if ep == 0 else sum(1 for _ in range(t) if _ % cfg['t_max'] == 0))
+            if ep_steps == 0:
+                ep_steps = cfg['t_max']  # Fallback
+            
+            # Log both total and average return
             writer.add_scalar('episode_return', ep_return, t)
+            writer.add_scalar('episode_avg_return', ep_return / ep_steps, t)
             writer.add_scalar('n_waiting', info.get('n_waiting', 0), t)
+            
+            # Log adaptive reward metrics if enabled
+            if cfg.get('use_adaptive_reward', False):
+                writer.add_scalar('awt', info.get('awt', 0), t)
+                writer.add_scalar('ajt', info.get('ajt', 0), t)
+                writer.add_scalar('base_reward', info.get('base_reward', 0), t)
+                writer.add_scalar('adaptive_reward_bonus', info.get('adaptive_reward', 0), t)
+                
+                if 'performance_tier' in info:
+                    tier_values = {'excellent': 3, 'good': 2, 'average': 1, 'poor': 0}
+                    writer.add_scalar('performance_tier', tier_values.get(info['performance_tier'], 0), t)
+                
+                if 'awt_vs_best' in info:
+                    writer.add_scalar('awt_vs_best', info['awt_vs_best'], t)
+                
+                if 'meets_curriculum_target' in info:
+                    writer.add_scalar('meets_curriculum_target', 
+                                    1.0 if info['meets_curriculum_target'] else 0.0, t)
+            
             s = env.reset()
             ep_return = 0.0
             ep += 1
 
         if (t + 1) % cfg['log_interval'] == 0:
-            print(f"Step {t+1}/{total_steps} | eps={agent.epsilon():.3f} | ep={ep} | waiting={info.get('n_waiting', 0)}")
+            print(f"Step {t+1}/{total_steps} | eps={agent.epsilon():.3f} | ep={ep} | waiting={info.get('n_waiting', 0)} | ep_return={ep_return:.2f}")
 
         if (t + 1) % cfg['ckpt_interval'] == 0:
             ckpt_path = os.path.join(logdir, f'ckpt_step_{t+1}.pt')

@@ -2,6 +2,8 @@ from __future__ import annotations
 import numpy as np
 from typing import Tuple, Dict, Any, Optional
 from .sim_helpers import FloorQueues, Passenger, sample_arrivals
+from .passenger_tracker import PassengerTracker
+from .adaptive_rewards import AdaptiveRewardCalculator
 
 class EGCSEnv:
     """
@@ -15,7 +17,15 @@ class EGCSEnv:
                  seed: Optional[int] = None,
                  w_wait: float = 1.0, w_incar: float = 0.2,
                  r_alight: float = 0.1, r_board: float = 0.02,
-                 penalty_normalize: bool = True):
+                 penalty_normalize: bool = True,
+                 # Adaptive reward parameters
+                 use_adaptive_reward: bool = False,
+                 baseline_config: Optional[str] = None,
+                 baseline_weight: float = 0.5,
+                 performance_bonus_scale: float = 1.0,
+                 comparative_penalty_scale: float = 2.0,
+                 curriculum_stage: int = 0,
+                 use_dynamic_weights: bool = False):
         assert n_floors >= 2
         assert m_elevators >= 1
         self.N = n_floors
@@ -26,12 +36,31 @@ class EGCSEnv:
         self.T_max = t_max
         self.w_wait = w_wait
         self.w_incar = w_incar
+        self.w_wait_base = w_wait  # Store original weights
+        self.w_incar_base = w_incar
         # Reward shaping
         self.r_alight = float(r_alight)
         self.r_board = float(r_board)
         self.penalty_normalize = bool(penalty_normalize)
         self.norm_denom = max(1, self.N * self.capacity)
         self.rng = np.random.default_rng(seed)
+        
+        # Adaptive reward system
+        self.use_adaptive_reward = use_adaptive_reward
+        self.use_dynamic_weights = use_dynamic_weights
+        self.passenger_tracker = PassengerTracker()
+        
+        if self.use_adaptive_reward and baseline_config:
+            self.adaptive_calculator = AdaptiveRewardCalculator(
+                config_name=baseline_config,
+                baseline_weight=baseline_weight,
+                performance_bonus_scale=performance_bonus_scale,
+                comparative_penalty_scale=comparative_penalty_scale,
+                curriculum_stage=curriculum_stage
+            )
+        else:
+            self.adaptive_calculator = None
+        
         # dynamic state
         self.t = 0
         self.positions = np.zeros(self.M, dtype=np.int32)  # start at floor 0
@@ -52,6 +81,14 @@ class EGCSEnv:
         self.queues = FloorQueues(self.N)
         self.onboard = [list() for _ in range(self.M)]
         self.car_calls.fill(0)
+        
+        # Reset passenger tracker
+        self.passenger_tracker.reset()
+        
+        # Reset penalty weights to base values
+        self.w_wait = self.w_wait_base
+        self.w_incar = self.w_incar_base
+        
         return self._build_state()
 
     def _build_state(self) -> np.ndarray:
@@ -110,27 +147,84 @@ class EGCSEnv:
         arrivals = sample_arrivals(self.N, self.dt, self.t, self.rng, self.lambda_fn)
         for p in arrivals:
             self.queues.add(p)
-        # 5) Reward
+        
+        # Track passengers for AWT/AJT calculation
+        self.passenger_tracker.register_arrivals(len(arrivals), self.t)
+        if boarded_total > 0:
+            self.passenger_tracker.register_boarding(boarded_total, self.t)
+        if alighted_total > 0:
+            self.passenger_tracker.register_alighting(alighted_total, self.t)
+        
+        # 5) Reward calculation
+        # Key insight: The variance comes from the QUADRATIC relationship between
+        # arrivals and accumulated penalties. Solution: Use smoother penalty function
         n_waiting = sum(len(q) for q in self.queues.up) + sum(len(q) for q in self.queues.down)
         n_incar = sum(len(ob) for ob in self.onboard)
+        
+        # Get current performance metrics
+        awt = self.passenger_tracker.get_current_awt()
+        ajt = self.passenger_tracker.get_current_ajt()
+        
+        # Apply dynamic weights if enabled
+        if self.use_dynamic_weights and self.adaptive_calculator and awt > 0:
+            self.w_wait, self.w_incar = self.adaptive_calculator.get_dynamic_penalty_weights(awt)
+        
+        # Calculate base reward with CAPPED penalties to balance learning
+        # Key insight: LOWER cap + HIGHER weight = agent learns to avoid queues EARLY
+        # If cap is 50, agent can lazily let queues grow to 40-50
+        # Solution: Cap at 30 with stronger weight (0.40) to make 20-30 waiting HURT
+        
+        # Cap waiting penalty at 30 (not 50!) to force early action
+        MAX_PENALTY_WAITING = 30
+        MAX_PENALTY_INCAR = 15
+        
         if self.penalty_normalize:
-            wait_term = (self.w_wait * n_waiting) / self.norm_denom
-            incar_term = (self.w_incar * n_incar) / self.norm_denom
+            wait_capped = min(n_waiting, MAX_PENALTY_WAITING)
+            incar_capped = min(n_incar, MAX_PENALTY_INCAR)
+            wait_term = (self.w_wait * wait_capped) / self.norm_denom
+            incar_term = (self.w_incar * incar_capped) / self.norm_denom
         else:
-            wait_term = self.w_wait * n_waiting
-            incar_term = self.w_incar * n_incar
-        reward = - (wait_term + incar_term) + self.r_alight * alighted_total + self.r_board * boarded_total
+            # Piecewise linear: full penalty up to cap, then constant
+            wait_capped = min(n_waiting, MAX_PENALTY_WAITING)
+            incar_capped = min(n_incar, MAX_PENALTY_INCAR)
+            wait_term = self.w_wait * wait_capped
+            incar_term = self.w_incar * incar_capped
+        
+        base_reward = - (wait_term + incar_term) + self.r_alight * alighted_total + self.r_board * boarded_total
+        
+        # Apply adaptive reward if enabled
+        if self.use_adaptive_reward and self.adaptive_calculator and awt > 0:
+            stats = self.passenger_tracker.get_statistics()
+            service_rate = stats['total_served'] / max(1, stats['total_arrived'])
+            reward = self.adaptive_calculator.calculate_total_adaptive_reward(
+                base_reward, awt, ajt, n_waiting, n_incar, service_rate
+            )
+        else:
+            reward = base_reward
+        
         # 6) Time and done
         self.t += 1
         done = self.t >= self.T_max
         obs = self._build_state()
+        
+        # Build info dict
         info = {
             "n_waiting": n_waiting,
             "n_incar": n_incar,
             "arrivals": len(arrivals),
             "alighted": int(alighted_total),
             "boarded": int(boarded_total),
+            "awt": awt,
+            "ajt": ajt,
+            "base_reward": float(base_reward),
+            "adaptive_reward": float(reward - base_reward) if self.use_adaptive_reward else 0.0,
         }
+        
+        # Add adaptive reward info if enabled
+        if self.use_adaptive_reward and self.adaptive_calculator and awt > 0:
+            adaptive_info = self.adaptive_calculator.get_info_dict(awt, ajt)
+            info.update(adaptive_info)
+        
         return obs, float(reward), bool(done), info
 
     def _handle_open(self, i: int) -> Tuple[int, int]:

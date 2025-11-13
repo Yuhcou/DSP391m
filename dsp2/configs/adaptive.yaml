@@ -1,0 +1,58 @@
+# Improved config with proper reward scaling and traffic
+# Based on analysis of training issues
+
+# Environment - MEANINGFUL TRAFFIC
+n_floors: 5
+m_elevators: 2
+capacity: 6
+dt: 1.0
+lambda: 0.05  # Passengers per episode
+t_max: 1200   # Learning opportunities
+seed: 42
+
+# Rewards
+# Cap at 30 waiting
+r_alight: 3.0    # Positive reward for delivery
+r_board: 1.5     # Positive reward for pickup  
+w_wait: 0.10     # STRONG penalty (capped at 30 * 0.40 = 12 max per step)
+w_incar: 0.05    # Strong in-car penalty (capped at 15 * 0.15 = 2.25 max per step)
+penalty_normalize: false  # CRITICAL: Must be false or penalties are 100x weaker!
+# Logic: If 20 passengers waiting, penalty = -8 per step → agent MUST act!
+# Cap prevents catastrophic -80 per step at 200 waiting
+
+# Adaptive Reward System - REDUCED IMPACT
+use_adaptive_reward: true
+baseline_config: "simple"
+baseline_weight: 0.2          
+performance_bonus_scale: 0.5
+comparative_penalty_scale: 0.5  
+curriculum_stage: 0
+use_dynamic_weights: false
+
+# Agent - Optimized for faster learning
+gamma: 0.95      # Slightly lower - focus on immediate rewards
+lr: 0.001        # Keep learning rate
+batch_size: 64   # Larger batches for stable updates
+replay_capacity: 50000  # Increased from 20000
+target_update_steps: 1000  # More frequent target updates
+tau: 1.0
+epsilon_start: 1.0
+epsilon_end: 0.05  # More exploration at end
+decay_steps: 8000  # Slower decay to explore more
+grad_clip: 10.0
+
+# Network architecture
+dueling: true
+use_per: false   # Keep simple for now
+per_alpha: 0.6
+per_beta: 0.4
+per_beta_increment: 0.000001
+use_vdn: false
+use_central_bias: false
+
+# Training - More steps for higher traffic
+training_steps: 30000  # Increased from 10000
+warmup_steps: 1000     # More warmup for higher traffic
+log_interval: 500
+ckpt_interval: 10000
+logdir: dsp2/logs/improved_adaptive

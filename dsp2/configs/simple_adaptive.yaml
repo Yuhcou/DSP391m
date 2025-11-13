@@ -1,0 +1,50 @@
+# Simple config with Adaptive Rewards ENABLED
+# Environment - Very easy scenario
+n_floors: 5
+m_elevators: 2
+capacity: 6
+dt: 1.0
+lambda: 0.03
+t_max: 600
+seed: 42
+w_wait: 1.0
+w_incar: 0.5
+r_alight: 1.0
+r_board: 0.5
+penalty_normalize: true
+
+# Adaptive Reward System (ENABLED for testing)
+use_adaptive_reward: true  # ✅ ENABLED
+baseline_config: "simple"  # Compare against simple baseline
+baseline_weight: 0.3  # Weight for baseline comparison (reduced from 0.5)
+performance_bonus_scale: 0.5  # Multiplier for performance bonuses (reduced from 1.0)
+comparative_penalty_scale: 0.5  # Multiplier for comparative penalties (reduced from 2.0)
+curriculum_stage: 0  # Start at stage 0 (beat random) - easier target
+use_dynamic_weights: false  # Disable dynamic weights for now to reduce complexity
+
+# Agent - Simple configuration
+gamma: 0.95
+lr: 0.001
+batch_size: 32
+replay_capacity: 20000
+target_update_steps: 500
+tau: 1.0
+epsilon_start: 1.0
+epsilon_end: 0.1
+decay_steps: 5000
+grad_clip: 10.0
+# Improvements
+dueling: true
+use_per: false
+per_alpha: 0.6
+per_beta: 0.4
+per_beta_increment: 0.000001
+use_vdn: false
+use_central_bias: false
+
+# Training
+training_steps: 10000
+warmup_steps: 500
+log_interval: 500
+ckpt_interval: 5000
+logdir: dsp2/logs/simple_adaptive

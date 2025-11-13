@@ -1,0 +1,169 @@
+aggregate:
+  max_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+  - &id001 !!python/object/apply:numpy.dtype
+    args:
+    - f8
+    - false
+    - true
+    state: !!python/tuple
+    - 3
+    - <
+    - null
+    - null
+    - null
+    - -1
+    - -1
+    - 0
+  - !!binary |
+    +gB2xs1CPkA=
+  max_awt: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    JsDvF1UQMEA=
+  mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    wbODHEPGIUA=
+  mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    +zPMQTC4FUA=
+  mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    QoLix5i7BMA=
+  min_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    3RWyda9LC0A=
+  min_awt: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    InSNInSNBEA=
+algorithms:
+  collective:
+    mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      MOIEMOIEDEA=
+    mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      6gOlttBxCkA=
+    mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      HoXrUbge878=
+    std_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      xKIQjXbE4j8=
+    std_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      3f/sHwq9A0A=
+    std_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      TEXT6pgxAkA=
+  fixed_priority:
+    mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      3RWyda9LC0A=
+    mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      XJlrj8yeBEA=
+    mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      H1pkO99P4b8=
+    std_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      ZeRqEIHA4z8=
+    std_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      R6Ymkn0f3z8=
+    std_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      QnyY5u0D1j8=
+  nearest_car:
+    mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      K8eBK8eBC0A=
+    mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      NvXdaSgRBUA=
+    mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      FFg5tMh24r8=
+    std_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      r39z2Kv95j8=
+    std_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      9GPvxUhH4j8=
+    std_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      2MAZctt41D8=
+  random:
+    mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      +gB2xs1CPkA=
+    mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      JsDvF1UQMEA=
+    mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      iBbZzvcTJMA=
+    std_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AzCjcV0HMEA=
+    std_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      zsLnYDprF0A=
+    std_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      xDO2LqcxFUA=
+  sectoring:
+    mean_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      A0RhNXeUDkA=
+    mean_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      InSNInSNBEA=
+    mean_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      MwisHFpk478=
+    std_ajt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      MhBQ+hgz6D8=
+    std_awt: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VA3C9BpY2z8=
+    std_return: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      33Cu/Ox/2j8=
+config: mini
