@@ -96,8 +96,8 @@ def plot_training_metrics(data, save_path=None):
         
         # Plot smoothed values
         if len(values) > 10:
-            smoothed = smooth_curve(values, weight=0.9)
-            ax.plot(steps, smoothed, linewidth=2, color='red', label='Smoothed (0.9)')
+            smoothed = smooth_curve(values, weight=0.6)
+            ax.plot(steps, smoothed, linewidth=2, color='red', label='Smoothed (0.6)')
         
         ax.set_xlabel('Training Steps', fontsize=10)
         ax.set_ylabel(ylabel, fontsize=10)
@@ -143,10 +143,10 @@ def plot_episode_returns_detailed(data, save_path=None):
     # Plot 1: Raw and smoothed returns
     ax1 = axes[0, 0]
     ax1.plot(steps, values, alpha=0.3, linewidth=0.5, color='blue', label='Raw Returns')
-    smoothed_90 = smooth_curve(values, weight=0.9)
-    smoothed_95 = smooth_curve(values, weight=0.95)
-    ax1.plot(steps, smoothed_90, linewidth=2, color='red', label='Smoothed (0.9)')
-    ax1.plot(steps, smoothed_95, linewidth=2, color='green', label='Smoothed (0.95)')
+    smoothed_90 = smooth_curve(values, weight=0.6)
+    smoothed_95 = smooth_curve(values, weight=0.8)
+    ax1.plot(steps, smoothed_90, linewidth=2, color='red', label='Smoothed (0.6)')
+    ax1.plot(steps, smoothed_95, linewidth=2, color='green', label='Smoothed (0.8)')
     ax1.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
     ax1.set_xlabel('Training Steps')
     ax1.set_ylabel('Episode Return')
